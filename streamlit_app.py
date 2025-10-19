@@ -7,7 +7,8 @@ import altair as alt
 
 MAX_DIGITS = 10000
 
-st.set_page_config(page_title="Collatz Conjecture Explorer", page_icon="🔢")
+st.set_page_config(page_title="Collatz Conjecture Explorer", page_icon="🔢", layout="wide")
+
 st.title("Collatz Conjecture Explorer")
 st.badge("Visual Logarithmic Scale: e")
 
