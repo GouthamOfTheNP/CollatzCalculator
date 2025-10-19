@@ -9,7 +9,7 @@ MAX_DIGITS = 10000
 
 st.set_page_config(page_title="Collatz Conjecture Explorer", page_icon="🔢")
 st.title("Collatz Conjecture Explorer")
-st.badge("Visual Logarithmic Scale: 10")
+st.badge("Visual Logarithmic Scale: e")
 
 user_input = st.text_input("Enter a positive integer (supports commas and powers like 10^25).")
 
