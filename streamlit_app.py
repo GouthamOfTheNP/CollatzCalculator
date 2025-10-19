@@ -5,7 +5,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-MAX_DIGITS = 1000
+MAX_DIGITS = 10000
 
 st.set_page_config(page_title="Collatz Conjecture Explorer", page_icon="🔢")
 st.title("Collatz Conjecture Explorer")
