@@ -96,25 +96,26 @@ if user_input:
         if n <= 0:
             st.error("Please enter a positive integer.")
         else:
-            with st.spinner(f"Calculating Collatz sequence for {n}..."):
+            with st.spinner(f"Calculating Collatz sequence..."):
                 log_sequence = compute_log_sequence(n)
-
-                df = pd.DataFrame({"Step": range(len(log_sequence)), "Value": log_sequence})
-                chart = alt.Chart(df).mark_line().encode(x="Step", y="Value")
-                st.altair_chart(chart, use_container_width=True)
-                st.badge(f"Sequence length (excluding start): {len(log_sequence) - 1}")
+                with st.spinner("Rendering sequence values"):
+                    df = pd.DataFrame({"Step": range(len(log_sequence)), "Value": log_sequence})
+                    chart = alt.Chart(df).mark_line().encode(x="Step", y="Value")
+                    st.altair_chart(chart, use_container_width=True)
+                st.info(f"Sequence length (excluding start): {len(log_sequence) - 1}")
                 
                 sequence_str = compute_sequence_strings(n)
                 
-                df = pd.DataFrame({
-                    "Step": range(len(sequence_str)),
-                    "Value": sequence_str
-                })
+                with st.spinner("Preparing full sequence display"):
+                    df = pd.DataFrame({
+                        "Step": range(len(sequence_str)),
+                        "Value": sequence_str
+                    })
                 
-                with st.expander("Full Collatz sequence"):
-                    if len(sequence_str) >= 10000:
-                        st.warning("⚠️ Sequence truncated to first 10,000 values for display.")
-                    st.dataframe(df, height=600)
+                    with st.expander("Full Collatz sequence"):
+                        if len(sequence_str) >= 10000:
+                            st.warning("⚠️ Sequence truncated to first 10,000 values for display.")
+                        st.dataframe(df, height=600)
 
     except ValueError:
         st.error("Invalid input or too large of an input. Please enter a positive integer (supports commas and powers like 10^25).")
