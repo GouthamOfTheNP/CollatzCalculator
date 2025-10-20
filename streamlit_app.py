@@ -69,7 +69,7 @@ if not st.session_state.get('captcha_passed', False):
                 st.session_state['captcha_passed'] = True
                 st.session_state['captcha_feedback'] = 'success'
                 with st.spinner("Verifying..."):
-                    time.sleep(1)
+                    time.sleep(2)
                     st.rerun()
             else:
                 st.session_state['captcha_feedback'] = 'error'
