@@ -168,6 +168,11 @@ def compute_sequence_strings(n, max_items=10000):
     return sequence_str
 
 
+@st.cache_data(max_entries=10)
+def compute_full_sequence(n):
+    return [str(val) for val in collatz_generator(n)]
+
+
 if st.session_state.get('captcha_passed', False) and st.session_state.get("user_input", "") != "":
     try:
         n = parse_number(st.session_state.get("user_input", ""))
@@ -183,9 +188,10 @@ if st.session_state.get('captcha_passed', False) and st.session_state.get("user_
                 st.info(f"Sequence length (excluding start): {len(log_sequence) - 1}")
                 
                 sequence_str = compute_sequence_strings(n)
+                full_sequence_str = compute_full_sequence(n)
                 
                 with st.spinner("Preparing full sequence display"):
-                    df = pd.DataFrame({
+                    df_display = pd.DataFrame({
                         "Step": range(len(sequence_str)),
                         "Value": sequence_str
                     })
@@ -196,8 +202,11 @@ if st.session_state.get('captcha_passed', False) and st.session_state.get("user_
                 with st.expander("Full Collatz sequence", expanded=st.session_state['expander_open']):
                         if len(sequence_str) >= 10000:
                             st.warning("⚠️ Sequence truncated to first 10,000 values for display.")
-                        st.dataframe(df, height=600)
-                        csv_data = df.to_csv(index=False).encode('utf-8')
+                        st.dataframe(df_display, height=600)
+                        csv_data = pd.DataFrame({
+                            "Step": range(len(full_sequence_str)),
+                            "Value": full_sequence_str
+                        }).to_csv(index=False).encode('utf-8')
                         st.download_button("Download full sequence as CSV", csv_data, file_name="collatz_sequence.csv")
                         st.session_state['expander_open'] = True
 
