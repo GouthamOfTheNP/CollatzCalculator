@@ -1,18 +1,95 @@
-import math
 import ast
+import math
+import time
+import random
 import operator
-import streamlit as st
 import pandas as pd
 import altair as alt
+import streamlit as st
 
 MAX_DIGITS = 10000
 
 st.set_page_config(page_title="Collatz Conjecture Explorer", page_icon="🔢", layout="wide")
 
-st.title("Collatz Conjecture Explorer")
-st.badge("Visual Logarithmic Scale: e")
 
-user_input = st.text_input("Enter a positive integer (supports commas and powers like 10^25).")
+def new_captcha():
+    operations = [
+        (lambda a, b: a + b, '+'),
+        (lambda a, b: a - b, '-'),
+        (lambda a, b: a * b, '×')
+    ]
+    
+    a = random.randint(1, 20)
+    b = random.randint(1, 20)
+    op_func, op_symbol = random.choice(operations)
+    
+    if op_symbol == '-':
+        a = random.randint(10, 30)
+        b = random.randint(1, a)
+    
+    st.session_state['captcha_a'] = a
+    st.session_state['captcha_b'] = b
+    st.session_state['captcha_op'] = op_func
+    st.session_state['captcha_symbol'] = op_symbol
+    st.session_state['captcha_answer'] = op_func(a, b)
+    st.session_state['captcha_passed'] = False
+    st.session_state['captcha_feedback'] = None
+
+
+if 'captcha_passed' not in st.session_state:
+    new_captcha()
+
+st.title("Collatz Conjecture Explorer")
+
+if not st.session_state.get('captcha_passed', False):
+    st.markdown("This app explores the Collatz Conjecture by generating and visualizing the sequence for a given positive integer input. Please solve the CAPTCHA below to continue.")
+    
+    a = st.session_state['captcha_a']
+    b = st.session_state['captcha_b']
+    symbol = st.session_state['captcha_symbol']
+    
+    with st.form("captcha_form"):
+        captcha_input = st.number_input(
+            f"What is {a} {symbol} {b}?", 
+            min_value=-1000, 
+            max_value=1000,
+            step=1, 
+            format="%d"
+        )
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            submitted = st.form_submit_button("Submit", use_container_width=True)
+        
+        with col2:
+            refresh = st.form_submit_button("New Captcha", use_container_width=True)
+        
+        if submitted:
+            if captcha_input == st.session_state['captcha_answer']:
+                st.session_state['captcha_passed'] = True
+                st.session_state['captcha_feedback'] = 'success'
+                with st.spinner("Verifying..."):
+                    time.sleep(1)
+                    st.rerun()
+            else:
+                st.session_state['captcha_feedback'] = 'error'
+        
+        if refresh:
+            new_captcha()
+            st.session_state['captcha_feedback'] = None
+            st.rerun()
+    
+    if st.session_state.get('captcha_feedback') == 'error':
+        st.error("Incorrect answer. Please try again.")
+
+if st.session_state.get('captcha_passed', False):
+    st.badge("Visual Logarithmic Scale: e")
+    user_input = st.text_input("Enter a positive integer (supports commas and powers like 10^25).")
+    if user_input.strip() != "":
+        st.session_state["user_input"] = user_input
+else:
+    user_input = ""
 
 
 @st.cache_data
@@ -68,6 +145,7 @@ def parse_number(s: str) -> int:
         raise ValueError("Result is not a positive integer")
     return value
 
+
 def collatz_generator(n):
     while n != 1:
         yield n
@@ -91,13 +169,13 @@ def compute_sequence_strings(n, max_items=10000):
     return sequence_str
 
 
-if user_input:
+if st.session_state.get('captcha_passed', False) and st.session_state.get("user_input", "") != "":
     try:
-        n = parse_number(user_input)
+        n = parse_number(st.session_state.get("user_input", ""))
         if n <= 0:
             st.error("Please enter a positive integer.")
         else:
-            with st.spinner(f"Calculating Collatz sequence..."):
+            with st.spinner("Calculating Collatz sequence..."):
                 log_sequence = compute_log_sequence(n)
                 with st.spinner("Rendering sequence values"):
                     df = pd.DataFrame({"Step": range(len(log_sequence)), "Value": log_sequence})
