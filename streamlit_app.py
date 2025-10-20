@@ -212,13 +212,18 @@ if st.session_state.get('captcha_passed', False) and st.session_state.get("user_
                 if 'expander_open' not in st.session_state:
                     st.session_state['expander_open'] = False
                 
-                with st.expander("Full Collatz sequence", expanded=st.session_state['expander_open']):
-                        if len(sequence_str) >= 10000:
-                            st.warning("⚠️ Sequence truncated to first 10,000 values for display.")
-                        st.dataframe(df_display, height=600)
-                        csv_data = get_full_dataframe(full_sequence_str).to_csv(index=False).encode('utf-8')
-                        st.download_button("Download full sequence as CSV", csv_data, file_name="collatz_sequence.csv")
-                        st.session_state['expander_open'] = True
+                expander = st.expander("Full Collatz sequence")
+                with expander:
+                    if len(sequence_str) >= 10000:
+                        st.warning("⚠️ Sequence truncated to first 10,000 values for display.")
+                    st.dataframe(df_display, height=600)
+                    csv_data = get_full_dataframe(full_sequence_str).to_csv(index=False).encode('utf-8')
+                    st.download_button("Download full sequence as CSV", csv_data, file_name="collatz_sequence.csv")
+                
+                if expander._expanded:
+                    st.session_state['expander_open'] = True
+                else:
+                    st.session_state['expander_open'] = False
 
     except ValueError:
         st.error("Invalid input or too large of an input. Please enter a positive integer (supports commas and powers like 10^25).")
