@@ -173,6 +173,22 @@ def compute_full_sequence(n):
     return [str(val) for val in collatz_generator(n)]
 
 
+@st.cache_data
+def get_display_dataframe(sequence_str):
+    return pd.DataFrame({
+        "Step": range(len(sequence_str)),
+        "Value": sequence_str
+    })
+
+
+@st.cache_data
+def get_full_dataframe(full_sequence_str):
+    return pd.DataFrame({
+        "Step": range(len(full_sequence_str)),
+        "Value": full_sequence_str
+    })
+
+
 if st.session_state.get('captcha_passed', False) and st.session_state.get("user_input", "") != "":
     try:
         n = parse_number(st.session_state.get("user_input", ""))
@@ -191,10 +207,7 @@ if st.session_state.get('captcha_passed', False) and st.session_state.get("user_
                 full_sequence_str = compute_full_sequence(n)
                 
                 with st.spinner("Preparing full sequence display"):
-                    df_display = pd.DataFrame({
-                        "Step": range(len(sequence_str)),
-                        "Value": sequence_str
-                    })
+                    df_display = get_display_dataframe(sequence_str)
                     
                 if 'expander_open' not in st.session_state:
                     st.session_state['expander_open'] = False
@@ -203,10 +216,7 @@ if st.session_state.get('captcha_passed', False) and st.session_state.get("user_
                         if len(sequence_str) >= 10000:
                             st.warning("⚠️ Sequence truncated to first 10,000 values for display.")
                         st.dataframe(df_display, height=600)
-                        csv_data = pd.DataFrame({
-                            "Step": range(len(full_sequence_str)),
-                            "Value": full_sequence_str
-                        }).to_csv(index=False).encode('utf-8')
+                        csv_data = get_full_dataframe(full_sequence_str).to_csv(index=False).encode('utf-8')
                         st.download_button("Download full sequence as CSV", csv_data, file_name="collatz_sequence.csv")
                         st.session_state['expander_open'] = True
 
