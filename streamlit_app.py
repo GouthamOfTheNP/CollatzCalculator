@@ -15,7 +15,6 @@ st.set_page_config(page_title="Collatz Conjecture Explorer", page_icon="🔢", l
 def new_captcha():
     operations = [
         (lambda a, b: a + b, '+'),
-        (lambda a, b: a - b, '-'),
         (lambda a, b: a * b, '×')
     ]
     
@@ -51,7 +50,7 @@ if not st.session_state.get('captcha_passed', False):
     with st.form("captcha_form"):
         captcha_input = st.number_input(
             f"What is {a} {symbol} {b}?", 
-            min_value=-1000, 
+            min_value=0, 
             max_value=1000,
             step=1, 
             format="%d"
@@ -190,11 +189,17 @@ if st.session_state.get('captcha_passed', False) and st.session_state.get("user_
                         "Step": range(len(sequence_str)),
                         "Value": sequence_str
                     })
+                    
+                if 'expander_open' not in st.session_state:
+                    st.session_state['expander_open'] = False
                 
-                    with st.expander("Full Collatz sequence"):
+                with st.expander("Full Collatz sequence", expanded=st.session_state['expander_open']):
                         if len(sequence_str) >= 10000:
                             st.warning("⚠️ Sequence truncated to first 10,000 values for display.")
                         st.dataframe(df, height=600)
+                        csv_data = df.to_csv(index=False).encode('utf-8')
+                        st.download_button("Download full sequence as CSV", csv_data, file_name="collatz_sequence.csv")
+                        st.session_state['expander_open'] = True
 
     except ValueError:
         st.error("Invalid input or too large of an input. Please enter a positive integer (supports commas and powers like 10^25).")
