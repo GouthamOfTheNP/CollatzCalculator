@@ -94,7 +94,7 @@ else:
     user_input = ""
 
 
-@st.cache_data
+@st.cache_data(persist="disk")
 def parse_number(s: str) -> int:
     s = s.replace(",", "").replace(" ", "")
     s = s.replace("^", "**")
@@ -155,12 +155,12 @@ def collatz_generator(n):
     yield 1
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def compute_log_sequence(n):
     return [math.log(x) for x in collatz_generator(n)]
 
 
-@st.cache_data(max_entries=10)
+@st.cache_data(max_entries=10, ttl=3600, show_spinner=True)
 def compute_sequence_strings(n, max_items=10000):
     sequence_str = []
     for i, val in enumerate(collatz_generator(n)):
@@ -171,12 +171,12 @@ def compute_sequence_strings(n, max_items=10000):
     return sequence_str
 
 
-@st.cache_data(max_entries=10)
+@st.cache_data(max_entries=10, persist="disk", show_spinner=True)
 def compute_full_sequence(n):
     return [str(val) for val in collatz_generator(n)]
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def get_display_dataframe(sequence_str):
     return pd.DataFrame({
         "Step": range(len(sequence_str)),
@@ -184,7 +184,7 @@ def get_display_dataframe(sequence_str):
     })
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def get_full_dataframe(full_sequence_str):
     return pd.DataFrame({
         "Step": range(len(full_sequence_str)),
