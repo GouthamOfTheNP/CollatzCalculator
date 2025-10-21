@@ -16,7 +16,7 @@ def new_captcha():
     operations = [
         (lambda a, b: a + b, '+'),
         (lambda a, b: a * b, '×'),
-        {lambda a, b: a - b, '-'}
+        (lambda a, b: a - b, '-')
     ]
     
     a = random.randint(1, 20)
